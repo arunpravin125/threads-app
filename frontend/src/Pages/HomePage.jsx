@@ -1,0 +1,55 @@
+import {  Flex, Spinner } from '@chakra-ui/react'
+import React, { useEffect, useState } from 'react'
+
+
+import Post from '../components/Post'
+import { useRecoilState } from 'recoil'
+import postsAtom from '../atoms/postsAtom'
+
+const HomePage = () => {
+  const [posts,setPosts]=useRecoilState(postsAtom)
+ 
+const [loading,setLoading]=useState(true)
+  useEffect(()=>{
+    const getFeedPosts = async()=>{
+      setLoading(true)
+      
+      try {
+        const res = await fetch("/api/posts/feed")
+        const data = await res.json()
+
+        console.log("getPostData:",data)
+        if(data.error){
+          throw new Error(data.error)
+        }
+        setPosts(data)
+      } catch (error) {
+        console.log("error in feedPage:",error.message)
+        toast.error(error.message)
+      }finally{
+        setLoading(false)
+      }
+    }
+    getFeedPosts()
+
+  },[setPosts])
+  return (
+    <>
+    {loading && (
+      <Flex justify={"center"} >
+        <Spinner size="xl"  ></Spinner>
+      </Flex>
+    )}
+    {!loading && posts.length == 0 && (
+      <h1  >follow some user to see some feed</h1>
+    ) }
+
+    {posts.map((post)=>{
+      return <Post key={post._id} post={post} postedBy={post.postedBy} />
+    })}
+    
+    </>
+  )
+}
+
+export default HomePage
