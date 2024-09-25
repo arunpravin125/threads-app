@@ -42,7 +42,7 @@ const LogoutButton = () => {
     <Button isLoading={loading}  disabled={loading} onClick={handleLogout}
     postion={"fixed"}
     top={"10px"}
-    marginLeft={"100%"}
+    marginLeft={"90%"}
     size={"sm"}>
      <RiLogoutBoxRLine size={"20"}/>
     </Button>

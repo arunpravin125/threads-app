@@ -16,6 +16,10 @@ useEffect(()=>{
           if(data.error){
             throw new Error(data.error)
           }
+          if(data.isFrozen){
+            setUser(null)
+            return;
+          }
           setUser(data)
         } catch (error) {
           console.log("error in Userpages",error)

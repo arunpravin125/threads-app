@@ -13,7 +13,7 @@ const conversationSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-      seen:{
+      seen:{  
         type:Boolean,
         default:false
       }

@@ -57,7 +57,7 @@ export default function LoginCard() {
       toast.success('Login Successfully')
     } catch (error) {
       console.log("error in login",error.message)
-      toast.error(data.error)
+      toast.error(error.message)
     }finally{
       setLoading(false)
     }

@@ -25,6 +25,7 @@ const UserPages = () => {
   useEffect(()=>{
     
     const getPosts = async()=>{
+      if(!user)return;
       setFechingPost(true)
       try {
         const res = await fetch(`/api/posts/user/${username}`)
@@ -44,7 +45,7 @@ const UserPages = () => {
       }
     }
     getPosts()
-  },[username,setPosts])
+  },[username,setPosts,user])
 
 console.log("posts recoil state - ",posts)
 
