@@ -16,7 +16,7 @@ import { conversationAtom, selectedConversationAtom } from "../atoms/conversatio
 import toast from "react-hot-toast";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SocketContext";
-import messageSound from "../assets/sounds/message.mp3"
+// import messageSound from "../assets/sounds/message.mp3"
 
 const MessageContainer = () => {
   const [selectedConversation,setSelectedConversation]=useRecoilState(selectedConversationAtom)
@@ -34,10 +34,10 @@ const {socket} =useSocket()
         setMessages((prevMess)=>[...prevMess,message])
       }
       
-      if(!document.hasFocus()){
-        const sound = new Audio(messageSound)
-        sound.play()
-      }
+      // if(!document.hasFocus()){
+      //   const sound = new Audio(messageSound)
+      //   sound.play()
+      // }
 
       setConversation((prev)=>{
         const updatedConversations = prev.map(conversation=>{
@@ -70,7 +70,7 @@ socket.emit("markMessagesAsSeen",{
   userId:selectedConversation.userId
 })
     }
-    socket.on("messageSeen",({conversationId})=>{
+    socket.on("messagesSeen",({conversationId})=>{
       if(selectedConversation._id == conversationId){
         setMessages(prev =>{
           const updatedMessages = prev.map(message=>{
