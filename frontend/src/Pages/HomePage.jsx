@@ -6,6 +6,7 @@ import Post from '../components/Post'
 import { useRecoilState } from 'recoil'
 import postsAtom from '../atoms/postsAtom'
 import SuggestUsers from '../components/SuggestUsers'
+import toast from 'react-hot-toast'
 
 const HomePage = () => {
   const [posts,setPosts]=useRecoilState(postsAtom)
