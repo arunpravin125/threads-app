@@ -21,6 +21,7 @@ const Conversation = ({ conversation,isOnline }) => {
   const user = conversation.participants[0];
   const lastMessage = conversation.lastMessage;
   const [selectedConversation,setSelectedConversation]=useRecoilState(selectedConversationAtom)
+  console.log("Conversation :",conversation)
   console.log("selectedConversation:",selectedConversation)
   return (
     <Flex

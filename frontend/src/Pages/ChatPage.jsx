@@ -32,7 +32,7 @@ const ChatPage = () => {
   const [searchingUser, setSearchingUser] = useState(false);
 
   const {socket,onlineUsers}=useSocket()
-
+console.log("conversations:",conversations)
   useEffect(()=>{
     socket?.on("messagesSeen",({conversationId})=>{
       setConversations(prev=>{
@@ -67,7 +67,7 @@ const ChatPage = () => {
         if (data.error) {
           throw new Error(data.error);
         }
-        console.log("getMessages:", data);
+        console.log("getConversations:", data);
         setConversations(data);
       } catch (error) {
         console.log("error in getMessage:", error.message);
