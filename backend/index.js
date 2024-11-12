@@ -12,6 +12,7 @@ import { messageRoutes } from "./routes/messageRoutes.js";
 
 import { app, server } from "./socket/socket.js";
 import path from "path";
+import { notificationRoutes } from "./routes/notificationRoutes.js";
 
 // const app = express()
 
@@ -40,6 +41,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
 app.use("/api/messages", messageRoutes);
+app.use("/api/notification",notificationRoutes);
 
 
 // http://localhost:4900 =>backend run,add frontend
