@@ -16,8 +16,10 @@ export const SocketContextProvider = ({children}) =>{
     const user = useRecoilValue(userAtom)
   const [socket,setSocket]=useState(null)
   const [onlineUsers,setOnlineUsers]=useState([])
+  //https://threads-socket.onrender.com
+  //"http://localhost:4900"
   useEffect(()=>{
-    const socket = io("http://localhost:4900",{
+    const socket = io("https://threads-socket.onrender.com",{
         query:{
             userId:user?._id
         }
