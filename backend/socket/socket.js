@@ -20,13 +20,22 @@ export const getRecipiantSocketId = (recipientId)=>{
 const userSocketMap = {} //userId :socketId
 
 io.on('connection',(socket)=>{
-    console.log("user connected",socket.id)
+ 
 const userId = socket.handshake.query.userId;
 
 if(userId !== "undefined"){
     userSocketMap[userId]=socket.id
 }
-
+socket.on("Like",async({postId,authId})=>{
+  
+    io.emit("newLike",{postId,authId})
+})
+// newComment:data,
+// postId:post._id
+socket.on('comment',({newComment,postId})=>{
+  
+    io.emit("new-comment",{newComment,postId})
+})
 socket.on("markMessagesAsSeen",async({conversationId,userId})=>{
     try {
         await Message.updateMany({conversationId:conversationId,seen:false},{$set:{seen:true}})

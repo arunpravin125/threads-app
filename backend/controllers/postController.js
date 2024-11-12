@@ -1,3 +1,4 @@
+import Notification from "../Models/notificaionModel.js"
 import Post from "../Models/postModel.js"
 import User from "../Models/userModel.js"
 import {v2 as cloudinary} from "cloudinary"
@@ -101,13 +102,23 @@ export const likeUnlikePost = async(req,res)=>{
             // unlike post
             await Post.updateOne({_id:postId},{$pull:{likes:userId}})
             // await post.findByIdAndUpdate(postId,{$pull:{likes:userId}})
-            res.status(200).json({message:"Post Unliked successfully"})
+            const posts = await Post.findById(postId)
+            res.status(200).json(posts.likes)
             // await post.save()
         }else{
            // like post
            post.likes.push(userId)
+         const notification =new Notification({
+            from:userId,
+            to:post.postedBy,
+            type:"like"
+         })
            await post.save()
-           res.status(200).json({message:"Post liked successfully"})
+           await notification.save()
+           const posts = await Post.findById(postId)
+         
+        //    Promise.all([post.save(),notification.save()])
+           res.status(200).json(posts.likes)
         }
     } catch (error) {
         console.log("error in likeUnlikePost:",error.message)
@@ -134,9 +145,17 @@ export const replyToPost = async(req,res)=>{
         }
 
         const reply = {userId,text,userProfilePic,username}
-        post.replies.push(reply)
-        await post.save()
+        const notification = new Notification({
+            type:"reply",
+            from:userId,
+            to:post.postedBy
 
+        })
+
+        post.replies.push(reply)
+        await notification.save()
+        await post.save()
+          
         res.status(200).json(reply)
 
         
@@ -156,7 +175,7 @@ export const getFeedPost = async(req,res)=>{
         }
 
         const following = user.following;
-                                                                        // .sort({createdAt: -1}) means latest post at top
+             // .sort({createdAt: -1}) means latest post at top
         const feedPost = await Post.find({postedBy:{$in:following}}).sort({createdAt :-1})
 
         res.status(200).json(feedPost)
@@ -178,7 +197,7 @@ export const getUserPosts = async(req,res)=>{
         if(!user){
            return res.status(404).json({error:"User not found"})
         }
-                                                                  //   created: -1 => means decending order 
+       //   created: -1 => means decending order 
         const posts = await Post.find({postedBy:user._id}).sort({created:-1})
 
         if(!posts){

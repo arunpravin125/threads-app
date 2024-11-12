@@ -28,8 +28,10 @@ const currentUser = useRecoilValue(userAtom)
 const {pid}=useParams()
 
 const navigate = useNavigate()
-
+console.log("posts:",posts)
 const currentPost = posts[0]
+
+console.log("currentPost[0]:",posts[0])
 
 useEffect(()=>{
 const getPost = async()=>{

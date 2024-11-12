@@ -20,7 +20,7 @@ const [loading,setLoading]=useState(true)
         const res = await fetch("/api/posts/feed")
         const data = await res.json()
 
-        console.log("getPostData:",data)
+        console.log("getPostData:",data) 
         if(data.error){
           throw new Error(data.error)
         }

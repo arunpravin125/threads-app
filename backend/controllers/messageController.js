@@ -96,8 +96,7 @@ export const getConversation = async(req,res)=>{
             select:"username profilePic"
           });
       
-          // remove the current user from participants
-
+       
          conversation.forEach(conversation=>{
             conversation.participants = conversation.participants.filter(
                 participants=>participants._id.toString() !== userId.toString()

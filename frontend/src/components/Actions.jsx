@@ -7,7 +7,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
@@ -22,18 +22,24 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react";
 import postsAtom from "../atoms/postsAtom";
+import { useSocket } from "../context/SocketContext";
 
 
 const Actions = ({ post}) => {
   const [posts, setPosts] = useRecoilState(postsAtom)
   const user = useRecoilValue(userAtom);
 
-  const [liked, setLiked] = useState(post.likes.includes(user?._id));
+  let [liked, setLiked] = useState(post.likes.includes(user?._id));
   const [isLiking, setIsLiking] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(false);
   const [isReplying,setIsReplying]=useState(false)
+  const [quick,setQuick]=useState()
+  const {socket,onlineUsers} =useSocket()
+  const {likes,setLikes}=useState()
+   const [realTime,setRealTime] = useState()
+   const [newCommand,setNewCommand] = useState()
 
   const handleLikeUnlike = async () => {
     if (isLiking) return;
@@ -47,32 +53,37 @@ const Actions = ({ post}) => {
           "Content-Type": "application/json",
         },
       });
-
+        
       const data = await res.json();
+      setQuick(post._id)
       console.log("likeUnlike:", data,"liked:",liked);
 
+      socket.emit("Like",{
+        postId:post._id,
+        authId:data
+      })
       if (!liked) {
         // add id of the current array to likes array
-       const updatedPosts = posts.map((p)=>{
-        if(post._id == p._id){
-          return {...p,likes:[...p.likes,user._id]}
-        }
-        return p;
-       })
-       setPosts(updatedPosts)
+      //  const updatedPosts = posts.map((p)=>{
+      //   if(post._id == p._id){
+      //     return {...p,likes:[...p.likes,user._id]}
+      //   }
+      //   return p;
+      //  })
+      //  setPosts(updatedPosts)
       } else {
-        // remove userid from the postLikes array
-       const updatedPosts = posts.map((p)=>{
-        if(post._id == p._id){
-          return {...p,likes:p.likes.filter((id)=>id !==user._id)}
-        }
-        return p
-       })
-       setPosts(updatedPosts)
+      //   // remove userid from the postLikes array
+      //  const updatedPosts = posts.map((p)=>{
+      //   if(post._id == p._id){
+      //     return {...p,likes:p.likes.filter((id)=>id !==user._id)}
+      //   }
+      //   return p
+      //  })
+      //  setPosts(updatedPosts)
       }
       
-
-      setLiked(!liked);
+     setLiked(!liked)
+      
 
       if (data.error) {
         toast.error(data.error);
@@ -85,6 +96,38 @@ const Actions = ({ post}) => {
       setIsLiking(false);
     }
   };
+
+  useEffect(()=>{
+ socket.on("newLike",({postId,authId})=>{
+     
+        if(!liked){
+          const updatedPosts = posts.map((p)=>{
+            if(postId == p._id){
+              return {...p,likes:authId}
+            }
+            return p;
+           })
+           setPosts(updatedPosts)
+           
+        }else{
+          const updatedPosts = posts.map((p)=>{
+            if(postId == p._id){
+              return {...p,likes:authId}
+            }
+            return p
+           })
+           setPosts(updatedPosts)
+          
+           
+        }
+       
+       
+ })
+ 
+ setQuick("")
+ 
+    //  return ()=> socket.off("updateAll")
+  },[quick,setLiked,liked,setPosts])
 
   const handleReply = async () => {
     if(isReplying)return;
@@ -109,8 +152,13 @@ const Actions = ({ post}) => {
 		if(data.error){
 			throw new Error(data.error)
 		}
+   
+    setNewCommand(data)
       //  setPost({...post,replies:[...post.replies,data.post.replies]})
-
+    socket.emit('comment',({
+      newComment:data,
+      postId:post._id
+    }))
       const updatedPosts = posts.map((p)=>{
         if(post._id==p._id){
           return {...p,replies:[...p.replies,data]}
@@ -131,6 +179,22 @@ const Actions = ({ post}) => {
 	}
   };
 
+  useEffect(()=>{
+ socket.on("new-comment",({newComment,postId})=>{
+
+  setRealTime(newComment)
+  const updatedPosts = posts.map((p)=>{
+    if(postId==p._id){
+      return {...p,replies:[...p.replies,newComment]}
+    }
+    return p
+  })
+   
+  setPosts(updatedPosts)
+ }) 
+ 
+  },[setRealTime,realTime])
+  console.log("realTimeCommand",realTime)
   return (
     <Flex flexDirection={"column"}>
       <Flex gap={3} my={2} onClick={(e) => e.preventDefault()}>
@@ -182,7 +246,8 @@ const Actions = ({ post}) => {
         </Text>
         <Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
         <Text color={"gray.light"} fontSize={"sm"}>
-          {post.likes.length} likes
+          {post.likes.length} likes 
+         
         </Text>
       </Flex>
       <Modal isOpen={isOpen} onClose={onClose}>

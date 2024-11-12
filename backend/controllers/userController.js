@@ -1,9 +1,10 @@
 import User from "../Models/userModel.js";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/helpers/generateTokensAndSetCookies.js";
-import {v2 as cloudinary} from "cloudinary"
+import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
 import Post from "../Models/postModel.js";
+import Notification from "../Models/notificaionModel.js";
 
 export const signupUser = async (req, res) => {
   try {
@@ -34,10 +35,10 @@ export const signupUser = async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         username: newUser.username,
-        bio:newUser.bio,
-        profilePic:newUser.profilePic,
-        followers:newUser.followers,
-        following:newUser.following
+        bio: newUser.bio,
+        profilePic: newUser.profilePic,
+        followers: newUser.followers,
+        following: newUser.following,
       });
     } else {
       res.status(400).json({ error: "Invalid user data" });
@@ -61,9 +62,9 @@ export const loginUser = async (req, res) => {
     if (!user || !isPasswordCorrect) {
       return res.status(400).json({ error: "Invalid username or password" });
     }
-    if(user.isFrozen){
-      user.isFrozen = false
-      await user.save()
+    if (user.isFrozen) {
+      user.isFrozen = false;
+      await user.save();
     }
     generateTokenAndSetCookie(user._id, res);
     res.status(200).json({
@@ -71,9 +72,8 @@ export const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       username: user.username,
-      bio:user.bio,
-      profilePic:user.profilePic
-      
+      bio: user.bio,
+      profilePic: user.profilePic,
     });
   } catch (error) {
     console.log("error in loginuset:", error.message);
@@ -101,7 +101,7 @@ export const followUnFollowUser = async (req, res) => {
     if (id === req.user._id.toString()) {
       return res
         .status(400)
-        .json({error: "You cannot  follow/unfollow yourself" });
+        .json({ error: "You cannot  follow/unfollow yourself" });
     }
 
     if (!userToModify || !currentUser) {
@@ -112,14 +112,25 @@ export const followUnFollowUser = async (req, res) => {
     if (isFollowing) {
       // unfollow user
       // modify current user following, modigfy followers of userToModiify
-      await User.findByIdAndUpdate(req.user._id, { $pull: { following: id } }); // login user ku pooie following array la {id=>already following Id} remove pandrom aprm {update vera pannanum follow pannuna gla } pooi remove pannanum follwers array la eruthu
-      await User.findByIdAndUpdate(id, { $pull: { followers: req.user._id } });
-
+      await User.updateOne({_id:id},{$pull:{followers:req.user._id}})
+      await User.updateOne({_id:req.user._id},{$pull:{following:id}})
+      // await User.findByIdAndUpdate(req.user._id, { $pull: { following: id } });
+       // login user ku pooie following array la {id=>already following Id} remove pandrom aprm {update vera pannanum follow pannuna gla } pooi remove pannanum follwers array la eruthu
+      // await User.findByIdAndUpdate(id, { $pull: { followers: req.user._id } });
+      
       res.status(200).json({ message: "User unfollowed successfully" });
     } else {
+      await User.updateOne({_id:id},{$push:{followers:req.user._id}})
+      await User.updateOne({_id:req.user._id},{$push:{following:id}})
       //follow user
-      await User.findByIdAndUpdate(req.user._id, { $push: { following: id } });
-      await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } });
+      // await User.findByIdAndUpdate(req.user._id, { $push: { following: id } });
+      // await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } });
+      const notification = new Notification({
+        type:"follow",
+        from:currentUser._id,
+        to:userToModify._id
+
+    })
       res.status(200).json({ message: "User followed successfully" });
     }
   } catch (error) {
@@ -129,136 +140,134 @@ export const followUnFollowUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  var { name, email, password, username,  bio } = req.body;
-  var {profilePic}=req.body
+  var { name, email, password, username, bio } = req.body;
+  var { profilePic } = req.body;
   const userId = req.user._id;
-  
+
   try {
+    let user = await User.findById(userId);
 
-    let user = await User.findById(userId)
-
-    if(req.params.id !== userId.toString()){
-        return res.status(400).json({error:"You cannod update other user's profile"})
+    if (req.params.id !== userId.toString()) {
+      return res
+        .status(400)
+        .json({ error: "You cannod update other user's profile" });
     }
-    if(!user){
-        return res.status(404).json({error:"User not found"})
-    }
-
-    if(password){
-        const salt = await bcrypt.genSalt(10)
-        const hashPassword = await bcrypt.hash(password,salt)
-        user.password=hashPassword 
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    if(profilePic){
-      if(user.profilePic){
-        await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split(".")[0])
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(password, salt);
+      user.password = hashPassword;
+    }
+
+    if (profilePic) {
+      if (user.profilePic) {
+        await cloudinary.uploader.destroy(
+          user.profilePic.split("/").pop().split(".")[0]
+        );
       }
-      const uploadedResponse = await cloudinary.uploader.upload(profilePic)
-      profilePic=uploadedResponse.secure_url
+      const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+      profilePic = uploadedResponse.secure_url;
     }
 
-    user.name = name || user.name
-    user.email = email || user.email
-    user.username= username || user.username
-    user.profilePic= profilePic||user.profilePic
-    user.bio=bio||user.bio
-   
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.username = username || user.username;
+    user.profilePic = profilePic || user.profilePic;
+    user.bio = bio || user.bio;
 
-    user = await user.save() 
+    user = await user.save();
 
     await Post.updateMany(
-      {"replies.userId":userId}, // id
+      { "replies.userId": userId }, // id
       {
-        $set:{
-          "replies.$[r].username":user.username,
-          "replies.$[r].userProfilePic":user.profilePic,
-
-        }   // update things
+        $set: {
+          "replies.$[r].username": user.username,
+          "replies.$[r].userProfilePic": user.profilePic,
+        }, // update things
       },
-      {arrayFilters:[{"r.userId":userId}]} // filter
-    )
- 
-    user.password=  null
-    res.status(200).json(user)
+      { arrayFilters: [{ "r.userId": userId }] } // filter
+    );
 
+    user.password = null;
+    res.status(200).json(user);
   } catch (error) {
     console.log("error inupdateUser:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
 
+export const getUserProfile = async (req, res) => {
+  const { query } = req.params;
+  // we will fectch profile either user name or id
 
-
-export const getUserProfile = async(req,res)=>{
-    const {query}=req.params;
-    // we will fectch profile either user name or id
-
-    // query is either username or userId
-    try {
-
-      let user;
-      if(mongoose.Types.ObjectId.isValid(query)){
-        user = await User.findById(query).select("-password").select("-updatedAt")
-      }else{
-        user = await User.findOne({username:query}).select("-password").select("-updatedAt")
-      }
-      
-        if(!user){
-            return res.status(400).json({error:"User not found"})
-        }
-   
-        res.status(200).json(user)
-
-        
-    } catch (error) {
-        console.log("error in getUserProfile:",error.message)
-        res.status(500).json({ error: error.message });
+  // query is either username or userId
+  try {
+    let user;
+    if (mongoose.Types.ObjectId.isValid(query)) {
+      user = await User.findById(query)
+        .select("-password")
+        .select("-updatedAt");
+    } else {
+      user = await User.findOne({ username: query })
+        .select("-password")
+        .select("-updatedAt");
     }
-}
 
-export const getSuggestedUsers = async(req,res)=>{
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
 
+    res.status(200).json(user);
+  } catch (error) {
+    console.log("error in getUserProfile:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getSuggestedUsers = async (req, res) => {
   try {
     // exclude the current user from suggested user array,excludes users that current user is already following
 
-    const userId = req.user._id
+    const userId = req.user._id;
 
-    const usersFollowedByYou = await User.findById(userId).select("following")
+    const usersFollowedByYou = await User.findById(userId).select("following");
 
     const users = await User.aggregate([
       {
-        $match:{
-          _id:{$ne:userId}
-        }
-      },{
-        $sample:{size:10}
-      }
-    ])
-const filteredUsers = users.filter(user=>!usersFollowedByYou.following.includes(user._id))
-const suggestedUser = filteredUsers.slice(0,4)
-suggestedUser.forEach(user=>user.password=null)
-res.status(200).json(suggestedUser)
-
+        $match: {
+          _id: { $ne: userId },
+        },
+      },
+      {
+        $sample: { size: 10 },
+      },
+    ]);
+    const filteredUsers = users.filter(
+      (user) => !usersFollowedByYou.following.includes(user._id)
+    );
+    const suggestedUser = filteredUsers.slice(0, 4);
+    suggestedUser.forEach((user) => (user.password = null));
+    res.status(200).json(suggestedUser);
   } catch (error) {
-    console.log("error in suggestedUser",error.message)
-    res.status(500).json({error:error.message})
+    console.log("error in suggestedUser", error.message);
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
-export const freezeAccount = async(req,res)=>{
+export const freezeAccount = async (req, res) => {
   try {
-    const user =await User.findById(req.user._id);
-    if(!user){
-     return res.status(400).json({error:"User Not found"})
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(400).json({ error: "User Not found" });
     }
 
-    user.isFrozen = true
-    await user.save()
-    res.status(200).json({success:"true"})
-  
-    
+    user.isFrozen = true;
+    await user.save();
+    res.status(200).json({ success: "true" });
   } catch (error) {
-    res.status(400).json({error:error.message})
+    res.status(400).json({ error: error.message });
   }
-}
+};

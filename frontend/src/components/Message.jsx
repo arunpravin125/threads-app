@@ -55,15 +55,7 @@ const Message = ({ownMessage,message}) => {
           {message.text && (<Text maxW={"350px"} color={"black"} bg={"gray.400"} p={1} borderRadius={"md"} >
            {message.text}
           </Text>)}
-          {/* {
-        message.img && (
-          <Flex mt={5} w={"200px"} >
-            <Image src={message.img} 
-            alt='Messsage image' borderRadius={4}  />
-
-          </Flex>
-        )
-      } */}
+         
       {
         message.img && !isImgLoading && (
           <Flex mt={5} w={"200px"} >

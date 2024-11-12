@@ -30,6 +30,7 @@ const Post = ({ post,  postedBy }) => {
           throw new Error(data.error);
         }
         setUser(data);
+        console.log(data) 
       } catch (error) {
         console.log("error in fetch getuser:", error.message);
         toast.error(error.message);

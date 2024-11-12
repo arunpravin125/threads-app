@@ -15,7 +15,7 @@ const SuggestUsers = () => {
             throw new Error(data.error)
           }
           setSuggestedUsers(data)
-          console.log("suggestedUsers:",data)
+          console.log("suggestedUsers:",data) ;
         } catch (error) {
           toast.error(error.message)
         }finally{
