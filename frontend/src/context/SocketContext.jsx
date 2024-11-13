@@ -19,7 +19,7 @@ export const SocketContextProvider = ({children}) =>{
   //https://threads-socket.onrender.com
   //"http://localhost:4900"
   useEffect(()=>{
-    const socket = io("https://threads-socket.onrender.com",{
+    const socket = io("http://localhost:4900",{
         query:{
             userId:user?._id
         }

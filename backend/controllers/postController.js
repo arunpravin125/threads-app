@@ -78,9 +78,9 @@ export const deletePost = async(req,res)=>{
             const imgId = post.img.split('/').pop().split(".")[0]
             await cloudinary.uploader.destroy(imgId)
         }
-        await Post.findByIdAndDelete(req.params.id)
-        
-        res.status(200).json({message:"Post deleted successfully"})
+        await Post.findOneAndDelete({_id:req.params.id})
+        const posts = await Post.find()
+        res.status(200).json(posts)
     } catch (error) {
         console.log("error in deletePost:",error.message)
         res.status(500).json({error:error.message})
@@ -150,13 +150,15 @@ export const replyToPost = async(req,res)=>{
             from:userId,
             to:post.postedBy
 
+
         })
 
         post.replies.push(reply)
-        await notification.save()
         await post.save()
-          
-        res.status(200).json(reply)
+        await notification.save()
+        
+        const postReply = await Post.findById(postId)
+        res.status(200).json(postReply.replies)
 
         
     } catch (error) {

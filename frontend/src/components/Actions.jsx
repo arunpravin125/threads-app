@@ -40,6 +40,7 @@ const Actions = ({ post}) => {
   const {likes,setLikes}=useState()
    const [realTime,setRealTime] = useState()
    const [newCommand,setNewCommand] = useState()
+   const [likeId,setLikeId] = useState()
 
   const handleLikeUnlike = async () => {
     if (isLiking) return;
@@ -64,22 +65,22 @@ const Actions = ({ post}) => {
       })
       if (!liked) {
         // add id of the current array to likes array
-      //  const updatedPosts = posts.map((p)=>{
-      //   if(post._id == p._id){
-      //     return {...p,likes:[...p.likes,user._id]}
-      //   }
-      //   return p;
-      //  })
-      //  setPosts(updatedPosts)
+       const updatedPosts = posts.map((p)=>{
+        if(post._id == p._id){
+          return {...p,likes:data}
+        }
+        return p;
+       })
+       setPosts(updatedPosts)
       } else {
       //   // remove userid from the postLikes array
-      //  const updatedPosts = posts.map((p)=>{
-      //   if(post._id == p._id){
-      //     return {...p,likes:p.likes.filter((id)=>id !==user._id)}
-      //   }
-      //   return p
-      //  })
-      //  setPosts(updatedPosts)
+       const updatedPosts = posts.map((p)=>{
+        if(post._id == p._id){
+          return {...p,likes:data}
+        }
+        return p
+       })
+       setPosts(updatedPosts)
       }
       
      setLiked(!liked)
@@ -99,36 +100,28 @@ const Actions = ({ post}) => {
 
   useEffect(()=>{
  socket.on("newLike",({postId,authId})=>{
-     
-        if(!liked){
-          const updatedPosts = posts.map((p)=>{
-            if(postId == p._id){
-              return {...p,likes:authId}
-            }
-            return p;
-           })
-           setPosts(updatedPosts)
-           
-        }else{
-          const updatedPosts = posts.map((p)=>{
-            if(postId == p._id){
-              return {...p,likes:authId}
-            }
-            return p
-           })
-           setPosts(updatedPosts)
-          
-           
-        }
-       
+     setLikeId(authId)
+     setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post._id === postId ? { ...post,likes:authId } : post
+      )
+    );
+          // const updatedPosts = posts.map((p)=>{
+          //   if(postId == p._id){
+          //     return {...p,likes:authId}
+          //   }
+          //   return p;
+          //  })
+          //  setPosts(updatedPosts)
+           setLikeId("")
        
  })
  
- setQuick("")
- 
-    //  return ()=> socket.off("updateAll")
-  },[quick,setLiked,liked,setPosts])
 
+ return () => socket && socket.off("newLike")
+    //  return ()=> socket.off("updateAll")
+  },[setPosts,socket])
+//quick,setLiked,liked,setPosts
   const handleReply = async () => {
     if(isReplying)return;
     setIsReplying(true)
@@ -148,7 +141,7 @@ const Actions = ({ post}) => {
 		})
 		const data = await res.json()
 
-		console.log("reply:",data)
+	
 		if(data.error){
 			throw new Error(data.error)
 		}
@@ -161,7 +154,7 @@ const Actions = ({ post}) => {
     }))
       const updatedPosts = posts.map((p)=>{
         if(post._id==p._id){
-          return {...p,replies:[...p.replies,data]}
+          return {...p,replies:data}
         }
         return p
       })
@@ -183,18 +176,25 @@ const Actions = ({ post}) => {
  socket.on("new-comment",({newComment,postId})=>{
 
   setRealTime(newComment)
-  const updatedPosts = posts.map((p)=>{
-    if(postId==p._id){
-      return {...p,replies:[...p.replies,newComment]}
-    }
-    return p
-  })
+  // const updatedPosts = posts.map((p)=>{
+  //   if(postId==p._id){
+  //     return {...p,replies:newComment}
+  //   }
+  //   return p
+  // })
+   setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post._id === postId ? { ...post, replies:newComment } : post
+      )
+    );
    
-  setPosts(updatedPosts)
+  // setPosts(updatedPosts)
+  setRealTime("")
  }) 
+ return () => socket && socket.off("new-comment")
  
-  },[setRealTime,realTime])
-  console.log("realTimeCommand",realTime)
+  },[setPosts,socket])
+  // console.log("realTimeCommand",realTime)
   return (
     <Flex flexDirection={"column"}>
       <Flex gap={3} my={2} onClick={(e) => e.preventDefault()}>

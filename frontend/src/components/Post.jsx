@@ -30,7 +30,7 @@ const Post = ({ post,  postedBy }) => {
           throw new Error(data.error);
         }
         setUser(data);
-        console.log(data) 
+      
       } catch (error) {
         console.log("error in fetch getuser:", error.message);
         toast.error(error.message);
@@ -54,7 +54,7 @@ const Post = ({ post,  postedBy }) => {
       if(data.error){
         throw new Error(data.error)
       }
-      console.log(data)
+      console.log("deletePost",data)
       // setPosts((prev)=>prev.filter((p)=>p._id !== post._id))
       setPosts(posts.filter((po)=>(po._id !== post._id)))
       toast.success("Post deleted")
