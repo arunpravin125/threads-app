@@ -7,10 +7,12 @@ import { useRecoilState } from 'recoil'
 import postsAtom from '../atoms/postsAtom'
 import SuggestUsers from '../components/SuggestUsers'
 import toast from 'react-hot-toast'
+import { useSocket } from '../context/SocketContext'
 
 const HomePage = () => {
   const [posts,setPosts]=useRecoilState(postsAtom)
- 
+  // const {socket,onlineUsers} =useSocket()
+  const {socket,onlineUsers,notifications,setNotifications,notificationLength,setNotificationLength} =useSocket()
 const [loading,setLoading]=useState(true)
   useEffect(()=>{
     const getFeedPosts = async()=>{
@@ -35,6 +37,13 @@ const [loading,setLoading]=useState(true)
     getFeedPosts()
 
   },[setPosts])
+
+  
+  useEffect(()=>{
+    const notificationLen = notifications.filter((notifi)=>notifi.read==false )
+    setNotificationLength(notificationLen)
+  },[])
+
   return (
     <Flex gap={5} alignItems={"flex-start"}>
    <Box flex={70}>

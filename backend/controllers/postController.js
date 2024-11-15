@@ -2,6 +2,7 @@ import Notification from "../Models/notificaionModel.js"
 import Post from "../Models/postModel.js"
 import User from "../Models/userModel.js"
 import {v2 as cloudinary} from "cloudinary"
+import { getRecipiantSocketId, io } from "../socket/socket.js"
 
 export const getPosts = async(req,res)=>{
     try {
@@ -111,14 +112,28 @@ export const likeUnlikePost = async(req,res)=>{
          const notification =new Notification({
             from:userId,
             to:post.postedBy,
-            type:"like"
+            type:"like",
+            postImg:post.img,
+            likedText:post.text
          })
            await post.save()
            await notification.save()
+           console.log("notification",notification)
+        //    const PostedBYnotification = await Notification.find({to:{$in:post.postedBy}}).populate({path:"from", select:"username profilePic"}).sort({createdAt:-1})
+       
+        // //    const filteredNotification = PostedBYnotification.filter((notifi)=>notifi.from.toString() !== notifi.to.toString())
+         
+
            const posts = await Post.findById(postId)
          
         //    Promise.all([post.save(),notification.save()])
            res.status(200).json(posts.likes)
+           const recipientSocketId = getRecipiantSocketId(post.postedBy) // using recipients id and socketId
+           if(recipientSocketId){
+            //    console.log("recipientSocketId",recipientSocketId)
+            //    console.log("recipientSocketId",PostedBYnotification)
+               io.to(recipientSocketId).emit("live",{notification})
+           }
         }
     } catch (error) {
         console.log("error in likeUnlikePost:",error.message)
@@ -148,15 +163,24 @@ export const replyToPost = async(req,res)=>{
         const notification = new Notification({
             type:"reply",
             from:userId,
-            to:post.postedBy
-
-
+            to:post.postedBy,
+            postImg:post.img,
+            likedText:post.text
         })
-
+        // from:userId,
+        // to:post.postedBy,
+        // type:"like",
+        // postImg:post.img,
+        // likedText:post.text
+        
         post.replies.push(reply)
         await post.save()
         await notification.save()
-        
+        const recipientSocketId = getRecipiantSocketId(post.postedBy) // using recipients id and socketId
+        if(recipientSocketId){
+            // console.log("recipientSocketId",recipientSocketId)
+            io.to(recipientSocketId).emit("live",notification)
+        }
         const postReply = await Post.findById(postId)
         res.status(200).json(postReply.replies)
 

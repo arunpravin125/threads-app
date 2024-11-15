@@ -15,6 +15,16 @@ const notificationSchema = new mongoose.Schema({
         type:String,
         required:true,
         enum:['follow','like','reply']
+    },
+    postImg:{
+        type:String,
+    },
+    likedText:{
+        type:String
+    },
+    read:{
+        type:Boolean,
+        default:false
     }
 
 },{timestamps:true})

@@ -18,7 +18,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import usePrevImage from "../hooks/usePrevImage";
 import { BsFillImageFill } from "react-icons/bs";
 import { useRef } from "react";
@@ -27,6 +27,7 @@ import userAtom from "../atoms/userAtom";
 import toast from "react-hot-toast";
 import postsAtom from "../atoms/postsAtom";
 import { useParams } from "react-router-dom";
+import { useSocket } from "../context/SocketContext";
 
 const MAX_CHAR = 500;
 
@@ -40,6 +41,10 @@ const CreatePost = () => {
   const [remainingChar, setRemainingChar] = useState(MAX_CHAR);
   const { username } = useParams();
   const [posts, setPosts] = useRecoilState(postsAtom);
+
+  const {socket,onlineUsers} =useSocket()
+  const [createdLivePost,setCreatedLivePost] = useState()
+
   const handleTextChange = (e) => {
     const inputText = e.target.value;
     if (inputText.length > MAX_CHAR) {
@@ -51,6 +56,7 @@ const CreatePost = () => {
       setRemainingChar(MAX_CHAR - inputText.length);
     }
   };
+
   const handleCreatePost = async () => {
     setLoading(true);
     try {
@@ -66,17 +72,22 @@ const CreatePost = () => {
         }),
       });
       const data = await res.json();
+      socket.emit("livePost",{livePost:data})
       if (username == user.username) {
-        setPosts([data, ...posts]);
+        setPosts(data);
+        // setPosts([data, ...posts]);
       }
 
       if (data.error) {
         throw new Error(data.error);
       }
-      console.log("createdPost:", data);
-      toast.success("Post created successfully");
-      setPostText(null);
+      console.log("createdPost:",data);
+     
+      setPostText('')
       setImageUrl(null);
+      toast.success("Post created successfully");
+   
+      
       onClose();
     } catch (error) {
       console.log("error in createPost:", error.message);
@@ -85,6 +96,18 @@ const CreatePost = () => {
       setLoading(false);
     }
   };
+
+  useEffect(()=>{
+    socket?.on("postLive",({livePost})=>{
+     console.log("socketPostLive",livePost)
+     if(livePost?.postedBy !== user?._id){
+      setPosts((prev)=>[livePost,...prev]);
+     }
+    })
+    // return ()=>socket?.off("postLive")
+},[setPosts,socket])
+
+  
   return (
     <>
       <Button

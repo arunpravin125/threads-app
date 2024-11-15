@@ -15,7 +15,7 @@ const Post = ({ post,  postedBy }) => {
   const [user, setUser] = useState(null);
   const currentUser = useRecoilValue(userAtom)
   const [posts,setPosts]=useRecoilState(postsAtom)
- console.log("getinPOST:",posts)
+
 
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ const Post = ({ post,  postedBy }) => {
       try {
         const res = await fetch(`/api/users/profile/${postedBy}`);
         const data = await res.json();
-        console.log("username by post", data);
+     
 
         if (data.error) {
           throw new Error(data.error);

@@ -36,6 +36,10 @@ socket.on('comment',({newComment,postId})=>{
   
     io.emit("new-comment",{newComment,postId})
 })
+socket.on('livePost',({livePost})=>{
+   console.log("Post",livePost)
+    io.emit("postLive",{livePost})
+})
 socket.on("markMessagesAsSeen",async({conversationId,userId})=>{
     try {
         await Message.updateMany({conversationId:conversationId,seen:false},{$set:{seen:true}})

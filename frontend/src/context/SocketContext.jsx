@@ -16,10 +16,12 @@ export const SocketContextProvider = ({children}) =>{
     const user = useRecoilValue(userAtom)
   const [socket,setSocket]=useState(null)
   const [onlineUsers,setOnlineUsers]=useState([])
+  const [notifications,setNotifications] = useState([])
+  const [notificationLength,setNotificationLength] = useState()
   //https://threads-socket.onrender.com
   //"http://localhost:4900"
   useEffect(()=>{
-    const socket = io("https://threads-app-socket.onrender.com",{
+    const socket = io("http://localhost:4900",{
         query:{
             userId:user?._id
         }
@@ -31,13 +33,13 @@ export const SocketContextProvider = ({children}) =>{
           setOnlineUsers(users)
     })
  
-    return () => socket && socket.close()  
+    return () => socket.close()  
                 
   },[user?._id])
 
   console.log("onlineUsers:",onlineUsers)
 
-    return (<SocketContext.Provider  value={{socket,setSocket,onlineUsers}} >
+    return (<SocketContext.Provider  value={{socket,notificationLength,setNotificationLength,setSocket,onlineUsers,notifications,setNotifications}} >
 {children}
     </SocketContext.Provider>)
 }

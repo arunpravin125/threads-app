@@ -1,5 +1,5 @@
 import { Button, Flex, Image, Link, useColorMode } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { Link as RouterLink } from "react-router-dom";
@@ -10,12 +10,29 @@ import useLogout from "../hooks/useLogout";
 import authScreenAtom from "../atoms/authAtom";
 import { BsFillChatLeftTextFill } from "react-icons/bs";
 import { MdOutlineSettings } from "react-icons/md";
+import { IoNotificationsOutline } from "react-icons/io5";
+import { useSocket } from "../context/SocketContext";
+import { FaUsersGear } from "react-icons/fa6";
 const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const user = useRecoilValue(userAtom);
   const { loading, Logout } = useLogout();
-
+  const {socket,onlineUsers,notifications,setNotifications,notificationLength,setNotificationLength} =useSocket()
   const setAuthScreen = useSetRecoilState(authScreenAtom);
+  
+ 
+  useEffect(()=>{
+   
+    socket?.on("live",({notification})=>{
+      console.log("liveNotification",notification)
+      setNotifications((prevNo)=>[notification,...prevNo])
+      
+    })
+     return ()=> socket?.off("live")
+    },[setNotifications,socket,setNotificationLength])
+    
+     
+    
   return (
     <Flex justifyContent={"space-between"} mt={6} mb="12">
       {user && (
@@ -27,7 +44,20 @@ const Header = () => {
             <BsFillChatLeftTextFill size={24} />
           </Link>
           <Link as={RouterLink} to="/settings">
-          <MdOutlineSettings size={20} />
+          <MdOutlineSettings size={24} />
+          </Link>
+          <Link as={RouterLink} to="/notification">
+          <div className="flex relative hover:text-gray-500 " >
+            <div>
+            <IoNotificationsOutline  size={24} />
+            </div>
+            <div className="absolute left-5 bottom-2 text-orange-300" >{notificationLength?.length>0?notificationLength?.length:null}</div>
+          </div>
+         
+         
+          </Link>
+          <Link as={RouterLink} to="/suggested">
+          <FaUsersGear  size={24} />
           </Link>
         </>
       )}
