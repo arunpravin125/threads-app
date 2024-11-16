@@ -3,10 +3,13 @@ import { CheckIcon, TimeIcon } from "@chakra-ui/icons";
 import toast from "react-hot-toast";
 import { MdOutlineDelete } from "react-icons/md";
 import { useSocket } from "../context/SocketContext";
+import { useRecoilState } from "recoil";
+import postsAtom from "../atoms/postsAtom";
 
 const NotificationPage = () => {
   // const [notifications, setNotifications] = useState([]);
   const {socket,onlineUsers,notifications,setNotifications} =useSocket()
+  const [posts,setPosts]=useRecoilState(postsAtom)
   useEffect(() => {
     const getNotification = async () => {
       try {
@@ -78,14 +81,17 @@ const NotificationPage = () => {
     }
   }
 
-  // useEffect(()=>{
+  useEffect(()=>{
    
-  // socket?.on("live",({notification})=>{
-  //   console.log("liveNotification",notification)
-  //   setNotifications((preNotifi)=>[...preNotifi,notification])
-  // })
-  //  return ()=> socket?.off("live")
-  // },[setNotifications,socket])
+  socket?.on("live",({notification})=>{
+    console.log("liveNotification",notification)
+    if(notification){
+     return setNotifications((preNotifi)=>[...preNotifi,notification].reverse())
+    }
+   
+  })
+   return ()=> socket?.off("live")
+  },[setNotifications,socket,setPosts])
 
 
   const formatDate = (dateString) => {
