@@ -61,6 +61,7 @@ io.emit("getOnlineUsers",Object.keys(userSocketMap)) // [1,2,3,4,5]
         socket.on('disconnect',()=>{
            
             console.log("User disconnected",socket.id)
+            
             delete userSocketMap[userId]
             io.emit("getOnlineUsers",Object.keys(userSocketMap)) // io.emit means all users
         })

@@ -134,9 +134,12 @@ useEffect(()=>{
             </div>
            
              <p>
-             {selectedConversation.userId?
+             {selectedConversation.userId !== currentUser._id?
        <div>
-        <p className="2x1 text-green-300" >{typing?"Typing...":""}</p>
+        <p className="2x1 text-green-300" >{typing?<div className="flex relative  items-center justify-center">
+          <p>Typing.</p>
+          <span className="loading  loading-dots loading-xs absolute left-12 top-3"></span>
+          </div>:""}</p>
        </div>
        :
        <div>{typing==0?"":""}</div>}

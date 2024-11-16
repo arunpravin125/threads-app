@@ -105,7 +105,7 @@ export const likeUnlikePost = async(req,res)=>{
             return res.status(404).json({error:"No post found"})
         }
         const userPostedBy = await User.findById(post.postedBy)
-        
+        const userfrom = await User.findById(userId)
         const userLikedPost = post.likes.includes(userId)
         if(userLikedPost){
             // unlike post
@@ -124,11 +124,11 @@ export const likeUnlikePost = async(req,res)=>{
             postImg:post.img,
             likedText:post.text,
             postUsername:{
-                user:userPostedBy.username,
+                user:userfrom.username,
                
             },
             postUserimg:{
-                img:userPostedBy.profilePic
+                img:userfrom.profilePic
             }
 
          })
@@ -171,6 +171,7 @@ export const replyToPost = async(req,res)=>{
 
         const post = await Post.findById(postId)
         const userPostedBy = await User.findById(post.postedBy)
+        const userfrom = await User.findById(userId)
         if(!post){
             return res.status(404).json({error:"Post not found"})
         }
@@ -183,11 +184,11 @@ export const replyToPost = async(req,res)=>{
             postImg:post.img,
             likedText:post.text,
             postUsername:{
-                user:userPostedBy.username,
+                user:userfrom.username,
                
             },
             postUserimg:{
-                img:userPostedBy.profilePic
+                img:userfrom.profilePic
             }
         })
         // from:userId,

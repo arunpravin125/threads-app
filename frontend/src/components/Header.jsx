@@ -21,15 +21,15 @@ const Header = () => {
   const setAuthScreen = useSetRecoilState(authScreenAtom);
   
  
-  useEffect(()=>{
+  // useEffect(()=>{
    
-    socket?.on("live",({notification})=>{
-      console.log("liveNotification",notification)
-      setNotifications((prevNo)=>[notification,...prevNo])
+  //   socket?.on("live",({notification})=>{
+  //     console.log("liveNotification",notification)
+  //     setNotifications((prevNo)=>[notification,...prevNo])
       
-    })
-     return ()=> socket?.off("live")
-    },[setNotifications,socket,setNotificationLength])
+  //   })
+  //    return ()=> socket?.off("live")
+  //   },[setNotifications,socket,setNotificationLength])
     
      
     

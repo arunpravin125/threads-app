@@ -15,6 +15,7 @@ const HomePage = () => {
   const [posts,setPosts]=useRecoilState(postsAtom)
   const user = useRecoilValue(userAtom);
   // const {socket,onlineUsers} =useSocket()
+  
   const {socket,onlineUsers,notifications,setNotifications,notificationLength,setNotificationLength} =useSocket()
 const [loading,setLoading]=useState(true)
   useEffect(()=>{
@@ -57,6 +58,16 @@ const [loading,setLoading]=useState(true)
        return ()=> socket?.off("livePost")
   },[socket,setPosts])
 
+  useEffect(()=>{
+   
+    socket?.on("live",({notification})=>{
+      console.log("liveNotification",notification)
+      setNotifications((prevNo)=>[notification,...prevNo])
+      
+    })
+     return ()=> socket?.off("live")
+    },[setNotifications,socket,setNotificationLength])
+    
   return (
     <Flex gap={5} alignItems={"flex-start"}>
    <Box flex={70}>

@@ -8,6 +8,7 @@ const Message = ({ownMessage,message}) => {
   const selectedConversation = useRecoilValue(selectedConversationAtom)
   const currentUser = useRecoilValue(userAtom)
   const [isImgLoading,setIsImgLoading]=useState(false)
+  
   return (
     <>
     {ownMessage?(
@@ -19,7 +20,7 @@ const Message = ({ownMessage,message}) => {
       {message.text && (
         <Flex bg={"green.800"} maxW={"350px"} p={1} borderRadius={"md"} >
         <Text color={"white"} >{message.text}</Text>
-        <Box  alignSelf={"flex-end"} ml={1} color={message.seen?" blue.500":""} fontWeight={"bold"} >
+        <Box  alignSelf={"flex-end"} ml={1} color={message.seen?"blue.500":""} fontWeight={"bold"} >
           <BsCheck2All size={16}  />
         </Box>
       </Flex>
