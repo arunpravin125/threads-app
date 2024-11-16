@@ -74,8 +74,8 @@ const CreatePost = () => {
       const data = await res.json();
       socket.emit("livePost",{livePost:data})
       if (username == user.username) {
-        setPosts(data);
-        // setPosts([data, ...posts]);
+        // setPosts(data);
+        setPosts([data, ...posts]);
       }
 
       if (data.error) {
@@ -97,15 +97,15 @@ const CreatePost = () => {
     }
   };
 
-  useEffect(()=>{
-    socket?.on("postLive",({livePost})=>{
-     console.log("socketPostLive",livePost)
-     if(livePost?.postedBy !== user?._id){
-      setPosts((prev)=>[livePost,...prev]);
-     }
-    })
-    // return ()=>socket?.off("postLive")
-},[setPosts,socket])
+//   useEffect(()=>{
+//     socket?.on("postLive",({livePost})=>{
+//      console.log("socketPostLive",livePost)
+//      if(livePost?.postedBy !== user?._id){
+//       setPosts((prev)=>[livePost,...prev]);
+//      }
+//     })
+//     // return ()=>socket?.off("postLive")
+// },[setPosts,socket])
 
   
   return (

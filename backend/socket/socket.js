@@ -40,6 +40,11 @@ socket.on('livePost',({livePost})=>{
    console.log("Post",livePost)
     io.emit("postLive",{livePost})
 })
+
+socket.on('typing',({typing,userId})=>{
+
+    io.to(userSocketMap[userId]).emit("currentTyping",{typing})
+})
 socket.on("markMessagesAsSeen",async({conversationId,userId})=>{
     try {
         await Message.updateMany({conversationId:conversationId,seen:false},{$set:{seen:true}})

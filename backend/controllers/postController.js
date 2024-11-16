@@ -56,6 +56,13 @@ try {
     const newPost = new Post({postedBy,text,img})
 
     await newPost.save()
+
+    // using recipients id and socketId
+   
+        // console.log("recipientSocketId",recipientSocketId)
+        io.emit("livePost",{newPost})
+    
+
     res.status(200).json(newPost)
 
 } catch (error) {
@@ -97,7 +104,8 @@ export const likeUnlikePost = async(req,res)=>{
         if(!post){
             return res.status(404).json({error:"No post found"})
         }
-
+        const userPostedBy = await User.findById(post.postedBy)
+        
         const userLikedPost = post.likes.includes(userId)
         if(userLikedPost){
             // unlike post
@@ -114,7 +122,15 @@ export const likeUnlikePost = async(req,res)=>{
             to:post.postedBy,
             type:"like",
             postImg:post.img,
-            likedText:post.text
+            likedText:post.text,
+            postUsername:{
+                user:userPostedBy.username,
+               
+            },
+            postUserimg:{
+                img:userPostedBy.profilePic
+            }
+
          })
            await post.save()
            await notification.save()
@@ -148,13 +164,13 @@ export const replyToPost = async(req,res)=>{
         const userId = req.user._id // userLogin id check
         const userProfilePic = req.user.profilePic  // userProfile check
         const username = req.user.username // userLogin user name
-
+         
         if(!text){
             return res.status(400).json({error:"text fields is required"})
         }
 
         const post = await Post.findById(postId)
-
+        const userPostedBy = await User.findById(post.postedBy)
         if(!post){
             return res.status(404).json({error:"Post not found"})
         }
@@ -165,7 +181,14 @@ export const replyToPost = async(req,res)=>{
             from:userId,
             to:post.postedBy,
             postImg:post.img,
-            likedText:post.text
+            likedText:post.text,
+            postUsername:{
+                user:userPostedBy.username,
+               
+            },
+            postUserimg:{
+                img:userPostedBy.profilePic
+            }
         })
         // from:userId,
         // to:post.postedBy,

@@ -40,6 +40,7 @@ const NotificationPage = () => {
         body: JSON.stringify({ notificationId: id }),
       });
       const data = await res.json();
+      console.log("read",data)
       if (data.error) {
         throw new Error(data.error);
       }
@@ -120,11 +121,11 @@ const NotificationPage = () => {
                   <>
                     <img
                       className="w-8 h-8 rounded-full"
-                      src={notification.from.profilePic}
-                      alt={notification.from.username}
+                      src={notification.postUserimg.img}
+                      alt={notification.postUsername.user}
                     />
                     <span className="font-bold text-gray-800">
-                      {notification.from.username}
+                      {notification.postUsername.user}
                     </span>
                   </>
                 )}

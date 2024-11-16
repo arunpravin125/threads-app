@@ -25,7 +25,15 @@ const notificationSchema = new mongoose.Schema({
     read:{
         type:Boolean,
         default:false
+    },
+    postUsername:{
+        user:String,
+        
+    },
+    postUserimg:{
+        img:String
     }
+
 
 },{timestamps:true})
 

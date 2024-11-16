@@ -8,6 +8,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
 import  postsAtom from "../atoms/postsAtom";
+
 const Post = ({ post,  postedBy }) => {
  
 

@@ -42,7 +42,7 @@ const Conversation = ({ conversation,isOnline }) => {
           mock:conversation.mock
         })
       }
-      bg={selectedConversation?._id == conversation._id ? useColorModeValue("gray.600",'gray.dark'):""}
+      bg={selectedConversation?._id == conversation?._id ? useColorModeValue("gray.600",'gray.dark'):""}
       borderRadius={"md"}
     >
       <WrapItem>

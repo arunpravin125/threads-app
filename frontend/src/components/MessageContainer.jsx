@@ -26,7 +26,7 @@ const MessageContainer = () => {
   const messageRef = useRef(null)
   const setConversation = useSetRecoilState(conversationAtom)
    
-const {socket} =useSocket()
+const {socket,selectedUserId,setSelectedUserId,typing} =useSocket()
   useEffect(()=>{
     socket.on("newMessage",(message)=>{
    
@@ -127,7 +127,25 @@ useEffect(()=>{
       <Flex w={"full"} h={12} alignItems={"center"} gap={2}>
         <Avatar src={selectedConversation.userProfilePic} size={"sm"}></Avatar>
         <Text display={"flex"} alignItems={"center"}>
-       {selectedConversation.username}<Image src="/verified.png" w={4} h={4} ml={1} />
+          <div className="flex gap-4" >
+            <div className="flex items-center justify-center" >
+            <h3> {selectedConversation.username}</h3>
+            <Image src="/verified.png" w={4} h={4} ml={1} />
+            </div>
+           
+             <p>
+             {selectedConversation.userId?
+       <div>
+        <p className="2x1 text-green-300" >{typing?"Typing...":""}</p>
+       </div>
+       :
+       <div>{typing==0?"":""}</div>}
+             </p>
+          </div>
+      
+      
+      
+    
         </Text>
       </Flex>
       <Divider />

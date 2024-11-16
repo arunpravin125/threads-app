@@ -18,6 +18,8 @@ export const SocketContextProvider = ({children}) =>{
   const [onlineUsers,setOnlineUsers]=useState([])
   const [notifications,setNotifications] = useState([])
   const [notificationLength,setNotificationLength] = useState()
+  const [typing,setTyping] = useState()
+  const [selectedUserId,setSelectedUserId] = useState()
   //https://threads-socket.onrender.com
   //"http://localhost:4900"
   useEffect(()=>{
@@ -39,7 +41,7 @@ export const SocketContextProvider = ({children}) =>{
 
   console.log("onlineUsers:",onlineUsers)
 
-    return (<SocketContext.Provider  value={{socket,notificationLength,setNotificationLength,setSocket,onlineUsers,notifications,setNotifications}} >
+    return (<SocketContext.Provider  value={{socket,notificationLength,setNotificationLength,selectedUserId,setSelectedUserId,setSocket,onlineUsers,notifications,setNotifications,typing,setTyping}} >
 {children}
     </SocketContext.Provider>)
 }

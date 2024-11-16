@@ -3,14 +3,17 @@ import React, { useEffect, useState } from 'react'
 
 
 import Post from '../components/Post'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import postsAtom from '../atoms/postsAtom'
 import SuggestUsers from '../components/SuggestUsers'
 import toast from 'react-hot-toast'
 import { useSocket } from '../context/SocketContext'
+import userAtom from '../atoms/userAtom'
+
 
 const HomePage = () => {
   const [posts,setPosts]=useRecoilState(postsAtom)
+  const user = useRecoilValue(userAtom);
   // const {socket,onlineUsers} =useSocket()
   const {socket,onlineUsers,notifications,setNotifications,notificationLength,setNotificationLength} =useSocket()
 const [loading,setLoading]=useState(true)
@@ -43,6 +46,16 @@ const [loading,setLoading]=useState(true)
     const notificationLen = notifications.filter((notifi)=>notifi.read==false )
     setNotificationLength(notificationLen)
   },[])
+
+  useEffect(()=>{
+       socket?.on("livePost",({newPost})=>{
+        console.log("livePost",newPost)
+        if(newPost.postedBy !== user._id ){
+            setPosts((prev)=>[newPost,...prev])
+        }
+       })
+       return ()=> socket?.off("livePost")
+  },[socket,setPosts])
 
   return (
     <Flex gap={5} alignItems={"flex-start"}>

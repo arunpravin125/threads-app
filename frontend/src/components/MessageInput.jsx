@@ -13,7 +13,7 @@ import {
   Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoSendSharp } from "react-icons/io5";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
@@ -23,18 +23,19 @@ import {
 import toast from "react-hot-toast";
 import { BsFillImageFill } from "react-icons/bs";
 import usePrevImage from "../hooks/usePrevImage";
+import { useSocket } from "../context/SocketContext";
 
 const MessageInput = ({ setMessages }) => {
   const [messageText, setMessageText] = useState("");
   const [loading, setLoading] = useState(false);
   const selectedConversation = useRecoilValue(selectedConversationAtom);
   const setConversation = useSetRecoilState(conversationAtom);
-
-  
+  const {socket,typing,setTyping,selectedUserId,setSelectedUserId} =useSocket()
   const { handleImageChange,imageUrl,setImageUrl} = usePrevImage();
   const { onClose } = useDisclosure();
   const [isSending, setIsSending] = useState(false);
   const ImageRef = useRef(null)
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!messageText && !imageUrl) return;
@@ -79,6 +80,7 @@ const MessageInput = ({ setMessages }) => {
       });
       setMessageText("");
       setImageUrl("");
+      setTyping(null)
     } catch (error) {
       console.log("error in sendMessage:", error.message);
       toast.error(error.message);
@@ -87,6 +89,19 @@ const MessageInput = ({ setMessages }) => {
       setIsSending(false);
     }
   };
+
+useEffect(()=>{
+   socket?.emit("typing",{
+    typing:messageText?.length>0?messageText?.length:0,
+    userId:selectedConversation?.userId
+   })
+   socket?.on("currentTyping",({typing})=>{
+      console.log("currentType",typing)
+      setTyping(typing)
+      // setSelectedUserId(userId)
+   })
+  
+},[socket,setMessageText?.length,messageText,setTyping])
 
   return (
     <Flex gap={2} alignItems={"center"}>
