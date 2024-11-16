@@ -21,31 +21,30 @@ const userSocketMap = {} //userId :socketId
 
 io.on('connection',(socket)=>{
  
-const userId = socket.handshake.query.userId;
+const userId = socket?.handshake.query.userId;
 
 if(userId !== "undefined"){
     userSocketMap[userId]=socket.id
 }
-socket.on("Like",async({postId,authId})=>{
+socket?.on("Like",async({postId,authId})=>{
   
     io.emit("newLike",{postId,authId})
 })
-// newComment:data,
-// postId:post._id
-socket.on('comment',({newComment,postId})=>{
+
+socket?.on('comment',({newComment,postId})=>{
   
     io.emit("new-comment",{newComment,postId})
 })
-socket.on('livePost',({livePost})=>{
+socket?.on('livePost',({livePost})=>{
    console.log("Post",livePost)
     io.emit("postLive",{livePost})
 })
 
-socket.on('typing',({typing,userId})=>{
+socket?.on('typing',({typing,userId})=>{
 
     io.to(userSocketMap[userId]).emit("currentTyping",{typing})
 })
-socket.on("markMessagesAsSeen",async({conversationId,userId})=>{
+socket?.on("markMessagesAsSeen",async({conversationId,userId})=>{
     try {
         await Message.updateMany({conversationId:conversationId,seen:false},{$set:{seen:true}})
         await Conversation.updateOne({_id:conversationId},{$set:{"lastMessage.seen":true}})

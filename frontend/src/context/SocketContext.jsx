@@ -23,19 +23,28 @@ export const SocketContextProvider = ({children}) =>{
   //https://threads-socket.onrender.com,https://threads-app-3-sr8q.onrender.com
   //"http://localhost:4900"
   useEffect(()=>{
-    const socket = io("https://threads-app-4.onrender.com",{
-        query:{
-            userId:user?._id
+
+    if(user){
+        const socket = io("https://threads-app-4.onrender.com",{
+            query:{
+                userId:user?._id
+            }
+        })
+    
+        setSocket(socket)
+    
+        socket.on("getOnlineUsers",(users)=>{
+              setOnlineUsers(users)
+        })
+     
+        return () => socket?.close() 
+    }else{
+        if(socket){
+            socket?.close()
+            setSocket(null)
         }
-    })
-
-    setSocket(socket)
-
-    socket.on("getOnlineUsers",(users)=>{
-          setOnlineUsers(users)
-    })
- 
-    return () => socket.close()  
+    }
+     
                 
   },[user?._id])
 

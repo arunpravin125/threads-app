@@ -108,10 +108,10 @@ export const likeUnlikePost = async (req, res) => {
     if (userLikedPost) {
       // unlike post
       await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
-      // await post.findByIdAndUpdate(postId,{$pull:{likes:userId}})
+    
       const posts = await Post.findById(postId);
       res.status(200).json(posts.likes);
-      // await post.save()
+     
     } else {
       // like post
       post.likes.push(userId);
@@ -170,33 +170,33 @@ export const replyToPost = async (req, res) => {
     }
 
     const reply = { userId, text, userProfilePic, username };
-    const notification = new Notification({
-      type: "reply",
-      from: userId,
-      to: post.postedBy,
-      postImg: post.img,
-      likedText: post.text,
-      postUsername: {
-        user: userfrom.username,
-      },
-      postUserimg: {
-        img: userfrom.profilePic,
-      },
-    });
-    // from:userId,
-    // to:post.postedBy,
-    // type:"like",
-    // postImg:post.img,
-    // likedText:post.text
+   
+    if(post.PostedBy.toString() !== userId.toString()){
+        const notification = new Notification({
+            type: "reply",
+            from: userId,
+            to: post.postedBy,
+            postImg: post.img,
+            likedText: post.text,
+            postUsername: {
+              user: userfrom.username,
+            },
+            postUserimg: {
+              img: userfrom.profilePic,
+            },
+          });
+          await notification.save();
+
+          const recipientSocketId = getRecipiantSocketId(post.postedBy); // using recipients id and socketId
+    if (recipientSocketId) {
+        io.to(recipientSocketId).emit("live", notification);
+    }
+    }
 
     post.replies.push(reply);
     await post.save();
-    await notification.save();
-    const recipientSocketId = getRecipiantSocketId(post.postedBy); // using recipients id and socketId
-    if (recipientSocketId) {
-      // console.log("recipientSocketId",recipientSocketId)
-      io.to(recipientSocketId).emit("live", notification);
-    }
+   
+    
     const postReply = await Post.findById(postId);
     res.status(200).json(postReply.replies);
   } catch (error) {
