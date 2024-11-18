@@ -43,11 +43,34 @@ const [loading,setLoading]=useState(true)
 
   },[setPosts])
 
+  useEffect(() => {
+    const getNotification = async () => {
+      try {
+        const res = await fetch("/api/notification/getNotification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        console.log("notification",data)
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        setNotifications(data);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        toast.error(error.message);
+      }
+    };
+    getNotification();
+  }, [setNotifications]);
   
   useEffect(()=>{
-    const notificationLen = notifications.filter((notifi)=>notifi.read==false )
+    const notificationLen = notifications.filter((notifi)=>notifi.read==false)
     setNotificationLength(notificationLen)
-  },[])
+  
+  },[setNotifications,setNotificationLength,notifications,notificationLength])
 
   useEffect(()=>{
        socket?.on("livePost",({newPost})=>{

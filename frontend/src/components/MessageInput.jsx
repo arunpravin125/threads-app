@@ -30,7 +30,7 @@ const MessageInput = ({ setMessages }) => {
   const [loading, setLoading] = useState(false);
   const selectedConversation = useRecoilValue(selectedConversationAtom);
   const setConversation = useSetRecoilState(conversationAtom);
-  const {socket,typing,setTyping,selectedUserId,setSelectedUserId} =useSocket()
+  const {socket,typing,setTyping,selectedUserId,setSelectedUserId,toUser,setToUser} =useSocket()
   const { handleImageChange,imageUrl,setImageUrl} = usePrevImage();
   const { onClose } = useDisclosure();
   const [isSending, setIsSending] = useState(false);
@@ -93,15 +93,31 @@ const MessageInput = ({ setMessages }) => {
 useEffect(()=>{
    socket?.emit("typing",{
     typing:messageText?.length>0?messageText?.length:0,
-    userId:selectedConversation?.userId
+    userId:selectedConversation?.userId,
+    conversationId:selectedConversation?._id,
    })
    socket?.on("currentTyping",({typing})=>{
       console.log("currentType",typing)
+    
       setTyping(typing)
+     
       // setSelectedUserId(userId)
    })
+
+   socket?.on("currentUserId",({conversationId})=>{
+    console.log("currentTypeUserId",conversationId)
+
+    if(selectedConversation?._id == conversationId){
+      setToUser(conversationId)
+    }
+   
+   
   
-},[socket,setMessageText?.length,messageText,setTyping])
+    // setSelectedUserId(userId)
+ })
+
+     
+},[socket,setMessageText?.length,messageText,setTyping,setToUser,selectedConversation?.userId])
 
   return (
     <Flex gap={2} alignItems={"center"}>

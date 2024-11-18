@@ -40,10 +40,15 @@ socket?.on('livePost',({livePost})=>{
     io.emit("postLive",{livePost})
 })
 
-socket?.on('typing',({typing,userId})=>{
-
+socket?.on('typing',({typing,userId,conversationId})=>{
+     
+     console.log("typing",typing)
     io.to(userSocketMap[userId]).emit("currentTyping",{typing})
+    io.to(userSocketMap[userId]).emit("currentUserId",{conversationId})
 })
+
+
+
 socket?.on("markMessagesAsSeen",async({conversationId,userId})=>{
     try {
         await Message.updateMany({conversationId:conversationId,seen:false},{$set:{seen:true}})

@@ -19,13 +19,14 @@ export const SocketContextProvider = ({children}) =>{
   const [notifications,setNotifications] = useState([])
   const [notificationLength,setNotificationLength] = useState()
   const [typing,setTyping] = useState()
+  const [toUser,setToUser] = useState()
   const [selectedUserId,setSelectedUserId] = useState()
   //https://threads-socket.onrender.com,https://threads-app-3-sr8q.onrender.com
   //"http://localhost:4900"
   useEffect(()=>{
 
     if(user){
-        const socket = io("https://threads-app-4.onrender.com",{
+        const socket = io("http://localhost:4900",{
             query:{
                 userId:user?._id
             }
@@ -37,12 +38,12 @@ export const SocketContextProvider = ({children}) =>{
               setOnlineUsers(users)
         })
      
-        return () => socket?.close() 
+       
     }else{
-        if(socket){
+        
             socket?.close()
             setSocket(null)
-        }
+        
     }
      
                 
@@ -50,7 +51,7 @@ export const SocketContextProvider = ({children}) =>{
 
   console.log("onlineUsers:",onlineUsers)
 
-    return (<SocketContext.Provider  value={{socket,notificationLength,setNotificationLength,selectedUserId,setSelectedUserId,setSocket,onlineUsers,notifications,setNotifications,typing,setTyping}} >
+    return (<SocketContext.Provider  value={{socket,toUser,setToUser,notificationLength,setNotificationLength,selectedUserId,setSelectedUserId,setSocket,onlineUsers,notifications,setNotifications,typing,setTyping}} >
 {children}
     </SocketContext.Provider>)
 }

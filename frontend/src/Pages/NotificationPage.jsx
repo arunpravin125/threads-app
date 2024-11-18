@@ -10,28 +10,28 @@ const NotificationPage = () => {
   // const [notifications, setNotifications] = useState([]);
   const {socket,onlineUsers,notifications,setNotifications} =useSocket()
   const [posts,setPosts]=useRecoilState(postsAtom)
-  useEffect(() => {
-    const getNotification = async () => {
-      try {
-        const res = await fetch("/api/notification/getNotification", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await res.json();
-        console.log("notification",data)
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        setNotifications(data);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-        toast.error(error.message);
-      }
-    };
-    getNotification();
-  }, [setNotifications]);
+  // useEffect(() => {
+  //   const getNotification = async () => {
+  //     try {
+  //       const res = await fetch("/api/notification/getNotification", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
+  //       const data = await res.json();
+  //       console.log("notification",data)
+  //       if (data.error) {
+  //         throw new Error(data.error);
+  //       }
+  //       setNotifications(data);
+  //     } catch (error) {
+  //       console.error("Error fetching notifications:", error);
+  //       toast.error(error.message);
+  //     }
+  //   };
+  //   getNotification();
+  // }, [setNotifications]);
 
   const handleMarkAsRead = async (id) => {
     try {
@@ -84,14 +84,28 @@ const NotificationPage = () => {
   useEffect(()=>{
    
   socket?.on("live",({notification})=>{
-    console.log("liveNotification",notification)
+    console.log("likeNotification",notification)
     if(notification){
-     return setNotifications((preNotifi)=>[...preNotifi,notification].reverse())
+      setNotifications((preNotifi)=>[...preNotifi,notification].reverse())
     }
    
   })
    return ()=> socket?.off("live")
   },[setNotifications,socket,setPosts])
+
+  
+  useEffect(()=>{
+   
+    socket?.on("commentLive",({notification})=>{
+      console.log("livecomment",notification)
+      if(notification){
+        setNotifications((preNotifi)=>[...preNotifi,notification].reverse())
+      }
+
+    })
+     return ()=> socket?.off("commentLive")
+    },[setNotifications,socket,setPosts])
+  
 
 
   const formatDate = (dateString) => {

@@ -168,10 +168,12 @@ export const replyToPost = async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
+    
+   
 
     const reply = { userId, text, userProfilePic, username };
    
-    if(post.PostedBy.toString() !== userId.toString()){
+    
         const notification = new Notification({
             type: "reply",
             from: userId,
@@ -185,19 +187,18 @@ export const replyToPost = async (req, res) => {
               img: userfrom.profilePic,
             },
           });
+
           await notification.save();
 
-          const recipientSocketId = getRecipiantSocketId(post.postedBy); // using recipients id and socketId
-    if (recipientSocketId) {
-        io.to(recipientSocketId).emit("live", notification);
-    }
-    }
-
-    post.replies.push(reply);
-    await post.save();
-   
-    
+         
+          post.replies.push(reply);
+          await post.save();
     const postReply = await Post.findById(postId);
+    const recipientSocketId = getRecipiantSocketId(post.postedBy); // using recipients id and socketId
+    if (recipientSocketId) {
+      console.log("recipinet",recipientSocketId)
+        io.to(recipientSocketId).emit("commentLive", {notification});
+    }
     res.status(200).json(postReply.replies);
   } catch (error) {
     console.log("error in reply to post :", error.message);

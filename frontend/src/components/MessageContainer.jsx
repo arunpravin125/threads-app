@@ -16,6 +16,7 @@ import { conversationAtom, selectedConversationAtom } from "../atoms/conversatio
 import toast from "react-hot-toast";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SocketContext";
+import Conversation from "./Conversation";
 // import messageSound from "../assets/sounds/message.mp3"
 
 const MessageContainer = () => {
@@ -26,11 +27,11 @@ const MessageContainer = () => {
   const messageRef = useRef(null)
   const setConversation = useSetRecoilState(conversationAtom)
    
-const {socket,selectedUserId,setSelectedUserId,typing} =useSocket()
+const {socket,selectedUserId,setSelectedUserId,toUser,setToUser,typing} =useSocket()
   useEffect(()=>{
     socket.on("newMessage",(message)=>{
    
-      if(selectedConversation._id === message.conversationId){
+      if(selectedConversation?._id === message?.conversationId){
         setMessages((prevMess)=>[...prevMess,message])
       }
       
@@ -58,7 +59,7 @@ const {socket,selectedUserId,setSelectedUserId,typing} =useSocket()
     })
 
 
-    return ()=>socket.off("newMessage")
+    return ()=>socket?.off("newMessage")
   },[socket,selectedConversation,setConversation])
 
   useEffect(()=>{
@@ -66,12 +67,12 @@ const {socket,selectedUserId,setSelectedUserId,typing} =useSocket()
     if(lastMessageIsFromTheUser){
 
 socket.emit("markMessagesAsSeen",{
-  conversationId:selectedConversation._id,
-  userId:selectedConversation.userId
+  conversationId:selectedConversation?._id,
+  userId:selectedConversation?.userId
 })
     }
     socket.on("messagesSeen",({conversationId})=>{
-      if(selectedConversation._id == conversationId){
+      if(selectedConversation?._id == conversationId){
         setMessages(prev =>{
           const updatedMessages = prev.map(message=>{
             if(!message.seen){
@@ -88,7 +89,7 @@ socket.emit("markMessagesAsSeen",{
   },[socket,currentUser._id,messages,selectedConversation])
 
 useEffect(()=>{
-  messageRef.current?.scrollIntoView({behavior : "smooth"})
+  messageRef?.current?.scrollIntoView({behavior : "smooth"})
 })
 
 
@@ -113,7 +114,7 @@ useEffect(()=>{
       }
     }
     getMessages()
-  },[selectedConversation.userId,setSelectedConversation,selectedConversation.mock])
+  },[selectedConversation?.userId,setSelectedConversation,selectedConversation?.mock])
   
   return (
     <Flex
@@ -134,7 +135,7 @@ useEffect(()=>{
             </div>
            
              <p>
-             {selectedConversation.userId !== currentUser._id?
+             {selectedConversation._id == toUser ? 
        <div>
         <p className="2x1 text-green-300" >{typing?<div className="flex relative  items-center justify-center">
           <p>Typing.</p>

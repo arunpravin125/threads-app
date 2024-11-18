@@ -18,11 +18,11 @@ import { selectedConversationAtom } from "../atoms/conversationAtom";
 const Conversation = ({ conversation,isOnline }) => {
   const currentUser = useRecoilValue(userAtom);
 
-  const user = conversation.participants[0];
-  const lastMessage = conversation.lastMessage;
+  const user = conversation?.participants[0];
+  const lastMessage = conversation?.lastMessage;
   const [selectedConversation,setSelectedConversation]=useRecoilState(selectedConversationAtom)
-  console.log("Conversation :",conversation)
-  console.log("selectedConversation:",selectedConversation)
+ 
+  console.log("selectedConversation:",selectedConversation?selectedConversation:"no selected Conversation")
   return (
     <Flex
       gap={4}

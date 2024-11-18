@@ -22,7 +22,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SocketContext";
 const ChatPage = () => {
-  const currentUser = useRecoilValue(userAtom);
+  const currentUser = useRecoilValue(userAtom?userAtom:null);
   const [conversations, setConversations] = useRecoilState(conversationAtom);
   const [selectedConversation, setSelectedConversation] = useRecoilState(
     selectedConversationAtom
